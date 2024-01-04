@@ -44,21 +44,25 @@ export class UserController {
   @Public()
   @Post('refresh')
   async refresh(@Request() request: Req, @Response() response: Res) {
-    const refreshToken = request.headers?.cookie
-      ?.split('; ')[1]
-      .split('Refresh=')[1]
-      ?.split('%20')[1];
+    const cookies = request.headers?.cookie?.split('; ');
+    const refreshToken = cookies
+      ?.find((cookie) => cookie.startsWith('Refresh'))
+      ?.split('=')[1];
     if (refreshToken) {
-      const authanticated = await this.userService.refresh(refreshToken);
+      const authanticated = await this.userService.refresh(
+        refreshToken.replaceAll('Bearer%20', ''),
+      );
       if (authanticated) {
         response.status(HttpStatus.CREATED);
         response.cookie('Authentication', `Bearer ${authanticated.jwt.token}`, {
-          maxAge: authanticated.jwt.expires.getSeconds() * 1000,
+          expires: authanticated.jwt.expires,
         });
         response.cookie('Refresh', `Bearer ${authanticated.refresh.token}`, {
-          maxAge: authanticated.refresh.expires.getSeconds() * 1000,
+          expires: authanticated.refresh.expires,
         });
         response.send(authanticated.user);
+
+        return authanticated.user;
       }
     } else {
       throw new HttpException('MISSING_REFRESH_TOKEN', HttpStatus.BAD_REQUEST);

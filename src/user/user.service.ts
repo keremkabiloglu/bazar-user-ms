@@ -64,11 +64,21 @@ export class UserService {
           payload,
           refreshExpireMilliSeconds,
         );
-        return new AuthenticatedUser({
-          user: null,
-          jwt: jwt,
-          refresh: refresh,
+        const user = await this.userRepository.findOne({
+          where: { id: verified.id },
         });
+        if (user) {
+          return new AuthenticatedUser({
+            user: user,
+            jwt: jwt,
+            refresh: refresh,
+          });
+        } else {
+          throw new HttpException(
+            'USER_NOT_FOUND',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
       }
     } catch (error) {
       throw new HttpException('REFRESH_TOKEN_INVALID', HttpStatus.FORBIDDEN);
