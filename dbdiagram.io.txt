@@ -1,0 +1,157 @@
+// UserDB
+
+Table user {
+  id integer [primary key, not null]
+  username varchar [not null]
+  email varchar [not null]
+  password varchar [not null]
+  firstName varchar [not null]
+  lastName varchar [not null]
+  photoUrl varchar [null]
+  gender enum [not null]
+  phoneNumber varchar [not null]
+  phoneNumberVerified boolean [not null,default: 'false']
+  birthdate timestamp [not null]
+  lastUnsuccessLoginAt timestamp [null]
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table userSetting {
+  id integer [primary key, not null]
+  userId integer [not null]
+  allowedCampaignNotifications boolean [not null, default: 'false']
+  allowedSaleNotifications bool [not null, default: 'true']
+  allowedFollowerNotifications bool [not null, default: 'true'] 
+  allowedMessageNotifications bool [not null, default: 'true']
+  allowedDiscountNotifications bool [not null, default: 'true']
+  allowedFavoriteNotifications bool [not null, default: 'true']
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table ban {
+  id integer [primary key, not null]
+  userId integer [not null]
+  employeeId integer [not null]
+  reason varchar [not null]
+  isPermanent bool [not null]
+  expireAt timestamp [null]
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table follower {
+  id integer [primary key, not null]
+  followerUserId integer [not null]
+  followedUserId integer [not null]
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table block {
+  id integer [primary key, not null]
+  blockerUserId integer [not null]
+  blockedUserId integer [not null]
+  reason varchar [null]
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table warning {
+  id integer [primary key, not null]
+  userId integer [not null]
+  employeeId integer [not null]
+  reason varchar [not null]
+  createdAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table address {
+  id integer [primary key, not null]
+  isDefault bool [not null]
+  userId integer [not null]
+  type enum [not null]
+  header varchar [not null]
+  phoneNumber varchar [not null]
+  cityId integer [not null]
+  districtId integer [not null]
+  villageId integer [not null]
+  description integer [not null]
+  taxNumber varchar [null]
+  companyName varchar [null]
+  taxOfficeId varchar [null]
+  reatedAt timestamp [not null,default: 'now()']
+  updatedAt timestamp [null] 
+  deletedAt timestamp [null]
+}
+
+Table notification {
+  id integer [primary key, not null]
+  userId integer [not null]
+  deviceId integer [not null]
+  title varchar [not null]
+  description varchar [not null]
+  imageUrl varchar [not null]
+  route varchar [null]
+  status enum [not null]
+  createdAt timestamp [ not null, default: 'now()']
+  updatedAt timestamp [null]
+  deletedAt timestamp [null]
+}
+
+Table favorite {
+  id integer [primary key,not null]
+  userId integer [not null]
+  advertId integer [ not null]
+  createdadvertPrice double [not null]
+  createdAt timestamp [not null, default: 'now()']
+  updatedAt timestamp [null]
+  deletedAt timestamp [null]
+}
+
+Table device {
+  id integer [primary key, not null]
+  userId integer [not null]
+  name varchar [not null]
+  ip varchar [not null]
+  cityId int [not null]
+  notificationsEnabled boolean [not null,default: 'false'] 
+  notificationToken varchar [null]
+  lastActivityAt timestamp [not null]
+  createdAt timestamp [not null, default: 'now()']
+  updatedAt timestamp [null]
+  deletedAt timestamp [null]
+}
+
+Table bankAccount {
+  id integer [primary key, not null]
+  userId integer [not null]
+  bankId integer [not null]
+  fullName varchar [not null]
+  iban varchar [not null]
+  currency enum [not null]
+  createdAt timestamp [not null, default: 'now()']
+  updatedAt timestamp [null]
+  deletedAt timestamp [null]
+}
+
+Ref :address.userId < user.id
+Ref :notification.userId < user.id
+Ref :favorite.userId < user.id
+Ref :device.userId < user.id
+Ref :notification.deviceId < device.id
+ref : follower.followerUserId < user.id
+ref : follower.followedUserId < user.id
+ref : block.blockerUserId < user.id
+ref : block.blockedUserId < user.id
+ref : warning.userId < user.id
+ref : ban.userId < user.id
+ref : userSetting.userId < user.id
+ref : bankAccount.userId < user.id
