@@ -12,7 +12,7 @@ import { Request as Req, Response as Res } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { LoginRequestDto } from './dtos/login.request.dto';
 import { UserService } from './user.service';
-var moment = require('moment-timezone');
+
 
 @Controller('user')
 export class UserController {

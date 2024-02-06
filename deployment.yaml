@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nestjs-app # Replace with your application name
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nestjs-app
+  template:
+    metadata:
+      labels:
+        app: user-service #
+    spec:
+      containers:
+        - name: nestjs-container
+          image: user-service:latest # Replace with your Docker image name
+          ports:
+            - containerPort: 3000 # Expose the port that your NestJS application runs on
