@@ -2,30 +2,31 @@ FROM alpine:latest as build
 
 WORKDIR /home/app
 
-RUN apk add --no-cache npm
-
 COPY package*.json ./
 COPY tsconfig*.json ./
-COPY .env ./
-RUN npm ci && npm cache clean --force
+
+RUN apk add --no-cache npm && \
+    npm ci && \
+    npm cache clean --force
+
 COPY ./src ./src
 
-RUN npm run build
+RUN npm run build && \
+    npm ci --omit=dev && \
+    npm cache clean --force
 
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install pkg --save-dev
+
+RUN npx pkg dist/main.js --config package.json  --output app_pkg --target latest-alpine-arm64 --compress GZip
 
 FROM alpine:latest as production
 
 WORKDIR /home/app
 
-RUN apk add --no-cache nodejs
+COPY --from=build /home/app/app_pkg ./
 
-COPY --from=build /home/app/.env ./
-COPY --from=build /home/app/dist ./dist
-COPY --from=build /home/app/node_modules ./node_modules
+RUN chmod +x app_pkg
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
-
-
+ENTRYPOINT [ "./app_pkg" ]

@@ -1,19 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nestjs-app # Replace with your application name
+  name: user-service # Replace with your application name
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nestjs-app
+      app: node-app # For the selector
   template:
     metadata:
       labels:
-        app: user-service #
+        app: node-app # For the selector
     spec:
       containers:
         - name: nestjs-container
           image: user-service:latest # Replace with your Docker image name
+          imagePullPolicy: Never # Change to Always if you are using a private registry
+          envFrom:
+            - secretRef:
+                name: user-service-secret
           ports:
             - containerPort: 3000 # Expose the port that your NestJS application runs on
+          #command: ['/bin/sh', '-c', 'env']
