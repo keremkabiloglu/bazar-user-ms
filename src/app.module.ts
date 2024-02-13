@@ -20,8 +20,14 @@ import { UserModule } from './user/user.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        synchronize: true,
-        entities: ['dist/**/*.entity{.ts,.js}'],
+        synchronize:
+          configService.get<string>('ENVIRONMENT') === 'development'
+            ? true
+            : false,
+        entities:
+          configService.get<string>('ENVIRONMENT') === 'development'
+            ? ['dist/**/*.entity{.ts,.js}']
+            : [__dirname + '/../**/*.entity{.ts,.js}'],
       }),
       inject: [ConfigService],
     }),
