@@ -22,13 +22,21 @@ export class UserService {
   ): Promise<AuthenticatedUser> {
     const user = await this.userRepository.findOne({
       where: { email: email, password: password },
+      relations: ['role', 'role.rolePermissions'],
     });
     if (user) {
       const jwtExpireMilliSeconds =
         this.configService.get<number>('JWT_EXPIRE');
       const refreshExpireMilliSeconds =
         this.configService.get<number>('JWT_REFRESH_EXPIRE');
-      const payload = new JWTPayload({ id: user.id, email: user.email });
+      const payload = {
+        id: user.id,
+        email: user.email,
+        role: user.role.name,
+        permissions: user.role.rolePermissions.map((p) => {
+          return { [p.entity]: p.permissions };
+        }),
+      };
       const jwt = await this.generateJwt(payload, jwtExpireMilliSeconds);
       const refresh = await this.generateJwt(
         payload,
@@ -55,10 +63,14 @@ export class UserService {
           this.configService.get<number>('JWT_EXPIRE');
         const refreshExpireMilliSeconds =
           this.configService.get<number>('JWT_REFRESH_EXPIRE');
-        const payload = new JWTPayload({
+        const payload = {
           id: verified.id,
           email: verified.email,
-        });
+          role: verified.role.name,
+          permissions: verified.role.permissions.map((p) => {
+            return { [p.entity]: p.permissions };
+          }),
+        };
         const jwt = await this.generateJwt(payload, jwtExpireMilliSeconds);
         const refresh = await this.generateJwt(
           payload,

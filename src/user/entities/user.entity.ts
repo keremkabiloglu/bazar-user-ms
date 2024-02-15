@@ -1,8 +1,16 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from 'src/role/entities/role.entity';
+import { DefaultEntity } from 'src/util/default.e';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Gender } from '../enums/gender.enum';
 
 @Entity()
-export class User {
+export class User extends DefaultEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -42,4 +50,8 @@ export class User {
     default: Gender.NOT_ANSWERED,
   })
   gender: Gender;
+
+  @OneToOne(() => Role)
+  @JoinColumn()
+  role: Role;
 }

@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthGuard } from './guards/auth.guard';
 import { UserModule } from './user/user.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UserModule } from './user/user.module';
       signOptions: { expiresIn: `${process.env.JWT_EXPIRE}s` },
     }),
     UserModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [

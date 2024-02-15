@@ -1,8 +1,8 @@
-export class JWTPayload {
+import { Permission } from 'src/role/enums/permission.enum';
+
+export interface JWTPayload {
   id: number;
   email: string;
-
-  constructor(opts: Required<JWTPayload>) {
-    Object.assign(this, opts);
-  }
+  role: string;
+  permissions: { [entity: string]: Permission[] }[];
 }
