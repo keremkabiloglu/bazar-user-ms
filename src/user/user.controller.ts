@@ -71,7 +71,7 @@ export class UserController {
   }
 
   @Post('test')
-  @Permissions(Permission.READ)
+  @Permissions(Permission.CREATE)
   async test() {
     return 'aa';
   }

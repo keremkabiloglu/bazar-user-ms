@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -33,39 +34,32 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-    try {
-      const payload = (await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      })) as JWTPayload;
-      request['user'] = payload;
-      const permissions = this.reflector.getAllAndOverride<string[]>(
-        PERMISSONS_KEY,
-        [context.getHandler(), context.getClass()],
-      );
 
-      if (permissions) {
-        const entity = context
-          .getClass()
-          .name.replace('Controller', '')
-          .toLowerCase();
-        const userPermissions = payload.permissions;
-        const hasPermission = permissions.some((permission) => {
-          return userPermissions.some((p) => {
-            return p[entity]?.map((perm) => `${perm}`)?.includes(permission);
-          });
+    const payload = (await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+    })) as JWTPayload;
+    request['user'] = payload;
+    const permissions = this.reflector.getAllAndOverride<string[]>(
+      PERMISSONS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (permissions) {
+      const entity = context
+        .getClass()
+        .name.replace('Controller', '')
+        .toLowerCase();
+      const userPermissions = payload.permissions;
+      const hasPermission = permissions.some((permission) => {
+        return userPermissions.some((p) => {
+          return p[entity]?.map((perm) => `${perm}`)?.includes(permission);
         });
-        if (!hasPermission) {
-          throw new UnauthorizedException();
-        }
+      });
+      if (!hasPermission) {
+        throw new ForbiddenException();
       }
-
-      // const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
-      //   PERMISSONS_KEY,
-      //   [context.getHandler(), context.getClass()],
-      // );
-    } catch {
-      throw new UnauthorizedException();
     }
+
     return true;
   }
 
