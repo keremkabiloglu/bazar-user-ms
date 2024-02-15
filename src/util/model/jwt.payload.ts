@@ -1,4 +1,4 @@
-import { Permission } from 'src/role/enums/permission.enum';
+import { Permission } from 'src/util/enum/permission.enum';
 
 export interface JWTPayload {
   id: number;

@@ -1,6 +1,6 @@
 import { DefaultEntity } from 'src/util/default.e';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { Permission } from '../enums/permission.enum';
+import { Permission } from '../../util/enum/permission.enum';
 import { Role } from './role.entity';
 
 @Entity()

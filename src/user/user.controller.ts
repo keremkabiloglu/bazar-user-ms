@@ -11,7 +11,7 @@ import { Request as Req, Response as Res } from 'express';
 
 import { Permissions } from 'src/decorators/permission.decorator';
 import { Public } from 'src/decorators/public.decorator';
-import { Permission } from 'src/role/enums/permission.enum';
+import { Permission } from 'src/util/enum/permission.enum';
 import { LoginRequestDto } from './dtos/login.request.dto';
 import { UserService } from './user.service';
 
@@ -71,7 +71,7 @@ export class UserController {
   }
 
   @Post('test')
-  @Permissions(Permission.CREATE)
+  @Permissions(Permission.READ)
   async test() {
     return 'aa';
   }

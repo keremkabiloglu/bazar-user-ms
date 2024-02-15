@@ -1,3 +1,39 @@
+import { CrudConfigService } from '@dataui/crud';
+import { Permissions } from './decorators/permission.decorator';
+import { Permission } from './util/enum/permission.enum';
+
+CrudConfigService.load({
+  routes: {
+    only: [
+      'getManyBase',
+      'getOneBase',
+      'createOneBase',
+      'updateOneBase',
+      'deleteOneBase',
+    ],
+    getManyBase: {
+      interceptors: [],
+      decorators: [Permissions(Permission.READ)],
+    },
+    getOneBase: {
+      interceptors: [],
+      decorators: [Permissions(Permission.READ)],
+    },
+    createOneBase: {
+      interceptors: [],
+      decorators: [Permissions(Permission.CREATE)],
+    },
+    updateOneBase: {
+      interceptors: [],
+      decorators: [Permissions(Permission.UPDATE)],
+    },
+    deleteOneBase: {
+      interceptors: [],
+      decorators: [Permissions(Permission.DELETE)],
+    },
+  },
+});
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

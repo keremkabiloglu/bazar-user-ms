@@ -1,5 +1,5 @@
+import { GeneratedJWT } from '../../util/model/generated.jwt';
 import { User } from '../entities/user.entity';
-import { GeneratedJWT } from './generated.jwt';
 
 export class AuthenticatedUser {
   user: User;

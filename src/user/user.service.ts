@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { GeneratedJWT } from '../util/model/generated.jwt';
+import { JWTPayload } from '../util/model/jwt.payload';
 import { User } from './entities/user.entity';
 import { AuthenticatedUser } from './models/authanticated.user';
-import { GeneratedJWT } from './models/generated.jwt';
-import { JWTPayload } from './models/jwt.payload';
 
 @Injectable()
 export class UserService {
