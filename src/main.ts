@@ -35,13 +35,17 @@ CrudConfigService.load({
 });
 
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('user-service');
+  const configService = app.get(ConfigService);
+  if (configService.get('ENVIRONMENT') === 'development') {
+    app.setGlobalPrefix('user-service');
+  }
   await app.listen(3000);
 }
 bootstrap();
