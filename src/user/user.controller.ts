@@ -13,7 +13,6 @@ import { Public } from 'src/decorators/public.decorator';
 import { LoginRequestDto } from './dtos/login.request.dto';
 import { UserService } from './user.service';
 
-
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
