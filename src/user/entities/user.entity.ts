@@ -1,9 +1,12 @@
+import { Address } from 'src/address/entities/address.entity';
+import { Favorite } from 'src/favorite/entities/favorite.entity';
 import { Role } from 'src/role/entities/role.entity';
 import { DefaultEntity } from 'src/util/default.e';
 import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -54,4 +57,10 @@ export class User extends DefaultEntity {
   @OneToOne(() => Role)
   @JoinColumn()
   role: Role;
+
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  favorites: Favorite[];
 }
