@@ -23,9 +23,14 @@ export class UserService {
   ): Promise<AuthenticatedUser> {
     const user = await this.userRepository.findOne({
       where: [
-        { email: emailPhoneUsername, password: password },
-        { phoneNumber: emailPhoneUsername, password: password },
+        {
+          phoneNumber: emailPhoneUsername.includes('+90')
+            ? emailPhoneUsername
+            : `+90${emailPhoneUsername}`,
+          password: password,
+        },
         { username: emailPhoneUsername, password: password },
+        { email: emailPhoneUsername, password: password },
       ],
       relations: ['role', 'role.rolePermissions'],
     });
