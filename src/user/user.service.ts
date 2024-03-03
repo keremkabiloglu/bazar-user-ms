@@ -60,11 +60,13 @@ export class UserService {
     }
   }
 
-  async register(registerRequestDto: RegisterRequestDto): Promise<any> {
+  async register(
+    registerRequestDto: RegisterRequestDto,
+  ): Promise<AuthenticatedUser> {
     const samePhoneUser = await this.userRepository.findOne({
       where: { phoneNumber: registerRequestDto.phoneNumber },
     });
-    if (!samePhoneUser) {
+    if (samePhoneUser === null || samePhoneUser === undefined) {
       let username = `${registerRequestDto.name} ${registerRequestDto.surname}`
         .toLocaleLowerCase()
         .replaceAll('ı', 'i')
@@ -94,7 +96,9 @@ export class UserService {
         .insert()
         .into(User)
         .values({
-          phoneNumber: registerRequestDto.phoneNumber,
+          phoneNumber: registerRequestDto.phoneNumber.includes('+90')
+            ? registerRequestDto.phoneNumber
+            : `+90${registerRequestDto.phoneNumber}`,
           username: username,
           password: registerRequestDto.password,
           firstName: this._upperCaseFirstLetters(registerRequestDto.name),

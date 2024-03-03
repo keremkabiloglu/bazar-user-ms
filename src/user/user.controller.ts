@@ -71,7 +71,21 @@ export class UserController {
 
   @Public()
   @Post('register')
-  async register(@Body() registerRequestDto: RegisterRequestDto): Promise<any> {
-    return await this.userService.register(registerRequestDto);
+  async register(
+    @Body() registerRequestDto: RegisterRequestDto,
+    @Response() response: Res,
+  ): Promise<any> {
+    const authanticated = await this.userService.register(registerRequestDto);
+
+    if (authanticated) {
+      response.status(HttpStatus.OK);
+      response.cookie('Authentication', `Bearer ${authanticated.jwt.token}`, {
+        expires: authanticated.jwt.expires,
+      });
+      response.cookie('Refresh', `Bearer ${authanticated.refresh.token}`, {
+        expires: authanticated.refresh.expires,
+      });
+      response.send(authanticated.user);
+    }
   }
 }

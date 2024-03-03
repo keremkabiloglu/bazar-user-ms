@@ -7,10 +7,10 @@ import {
 } from 'class-validator';
 
 export class RegisterRequestDto {
-  @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,}(?: [a-zA-ZçğıöşüÇĞİÖŞÜ]+)?$/)
+  @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,32}(?: [a-zA-ZçğıöşüÇĞİÖŞÜ]+)?$/)
   name: string;
 
-  @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,}$/)
+  @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,32}$/)
   @IsString()
   surname: string;
 
