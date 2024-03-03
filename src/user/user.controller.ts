@@ -9,10 +9,9 @@ import {
 } from '@nestjs/common';
 import { Request as Req, Response as Res } from 'express';
 
-import { Permissions } from 'src/decorators/permission.decorator';
 import { Public } from 'src/decorators/public.decorator';
-import { Permission } from 'src/util/enum/permission.enum';
 import { LoginRequestDto } from './dtos/login.request.dto';
+import { RegisterRequestDto } from './dtos/register.request.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -26,7 +25,7 @@ export class UserController {
     @Response() response: Res,
   ): Promise<void> {
     const authanticated = await this.userService.authenticate(
-      loginRequestDto.email,
+      loginRequestDto.emailPhoneUsername,
       loginRequestDto.password,
     );
 
@@ -70,9 +69,9 @@ export class UserController {
     }
   }
 
-  @Post('test')
-  @Permissions(Permission.READ)
-  async test() {
-    return 'aa';
+  @Public()
+  @Post('register')
+  async register(@Body() registerRequestDto: RegisterRequestDto): Promise<any> {
+    return await this.userService.register(registerRequestDto);
   }
 }

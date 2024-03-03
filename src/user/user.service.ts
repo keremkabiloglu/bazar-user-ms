@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GeneratedJWT } from '../util/model/generated.jwt';
 import { JWTPayload } from '../util/model/jwt.payload';
+import { RegisterRequestDto } from './dtos/register.request.dto';
 import { User } from './entities/user.entity';
 import { AuthenticatedUser } from './models/authanticated.user';
 
@@ -17,11 +18,15 @@ export class UserService {
   ) {}
 
   async authenticate(
-    email: string,
+    emailPhoneUsername: string,
     password: string,
   ): Promise<AuthenticatedUser> {
     const user = await this.userRepository.findOne({
-      where: { email: email, password: password },
+      where: [
+        { email: emailPhoneUsername, password: password },
+        { phoneNumber: emailPhoneUsername, password: password },
+        { username: emailPhoneUsername, password: password },
+      ],
       relations: ['role', 'role.rolePermissions'],
     });
     if (user) {
@@ -53,6 +58,67 @@ export class UserService {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  async register(registerRequestDto: RegisterRequestDto): Promise<any> {
+    const samePhoneUser = await this.userRepository.findOne({
+      where: { phoneNumber: registerRequestDto.phoneNumber },
+    });
+    if (!samePhoneUser) {
+      let username = `${registerRequestDto.name} ${registerRequestDto.surname}`
+        .toLocaleLowerCase()
+        .replaceAll('ı', 'i')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ü', 'u')
+        .replaceAll('ş', 's')
+        .replaceAll('ö', 'o')
+        .replaceAll('ç', 'c')
+        .replaceAll(' ', '.');
+      let usernameExist = false;
+      do {
+        const existUserNames = await this.userRepository.query(
+          'select "id" from "user" where username = $1',
+          [username],
+        );
+        if (existUserNames.length > 0) {
+          usernameExist = true;
+          const randomNumber = Math.floor(Math.random() * 1000);
+          username = `${username}${randomNumber}`;
+        } else {
+          usernameExist = false;
+        }
+      } while (usernameExist);
+
+      const insertedId = await this.userRepository
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({
+          phoneNumber: registerRequestDto.phoneNumber,
+          username: username,
+          password: registerRequestDto.password,
+          firstName: this._upperCaseFirstLetters(registerRequestDto.name),
+          lastName: this._upperCaseFirstLetters(registerRequestDto.surname),
+          role: { id: 1 },
+        })
+        .returning(['id'])
+        .execute();
+      if (insertedId) {
+        return await this.authenticate(
+          registerRequestDto.phoneNumber,
+          registerRequestDto.password,
+        );
+      }
+    } else {
+      throw new HttpException('PHONE_NUMBER_ALREADY_USED', HttpStatus.CONFLICT);
+    }
+  }
+
+  _upperCaseFirstLetters(str: string) {
+    return str
+      .split(' ')
+      .map((n) => n[0].toUpperCase() + n.slice(1))
+      .join(' ');
   }
 
   async refresh(refreshToken: string): Promise<AuthenticatedUser> {

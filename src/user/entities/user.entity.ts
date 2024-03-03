@@ -5,9 +5,8 @@ import { DefaultEntity } from 'src/util/default.e';
 import {
   Column,
   Entity,
-  JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Gender } from '../enums/gender.enum';
@@ -19,10 +18,22 @@ export class User extends DefaultEntity {
 
   @Column({
     unique: true,
-    default: 'example@example.com',
+    default: '',
     nullable: false,
   })
+  phoneNumber: string;
+
+  @Column({
+    nullable: true,
+  })
   email: string;
+
+  @Column({
+    unique: true,
+    default: '',
+    nullable: false,
+  })
+  username: string;
 
   @Column({
     type: 'text',
@@ -54,8 +65,13 @@ export class User extends DefaultEntity {
   })
   gender: Gender;
 
-  @OneToOne(() => Role)
-  @JoinColumn()
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  birthDate: Date;
+
+  @ManyToOne(() => Role, (role) => role.user)
   role: Role;
 
   @OneToMany(() => Address, (address) => address.user)

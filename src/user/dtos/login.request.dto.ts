@@ -1,15 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginRequestDto {
+  @IsNotEmpty()
   @IsString()
-  @IsEmail()
-  email: string;
+  emailPhoneUsername: string;
 
   @IsNotEmpty()
   @IsString()
   password: string;
-
-  constructor(opts: Required<LoginRequestDto>) {
-    Object.assign(this, opts);
-  }
 }
