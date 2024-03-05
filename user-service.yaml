@@ -32,7 +32,7 @@ spec:
           imagePullPolicy: Never # Change to Always if you are using a private registry
           envFrom:
             - secretRef:
-                name: user-service-secret
+                name: deployment-secret
           ports:
             - containerPort: 3000
               protocol: TCP

@@ -49,7 +49,6 @@ multipass exec microk8s-vm -- microk8s kubectl delete deployment $DOCKER_IMAGE_N
 echo "Applying Kubernetes deployment and service configurations"
 multipass exec microk8s-vm -- microk8s kubectl apply -f /tmp/$DOCKER_IMAGE_NAME/$DOCKER_IMAGE_NAME.yaml
 
-
 # Show Kubernetes pods status
 echo "Pods status:"
 multipass exec microk8s-vm -- microk8s kubectl get pods

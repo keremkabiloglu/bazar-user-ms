@@ -3,16 +3,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AddressModule } from './address/address.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthGuard } from './guards/auth.guard';
-import { UserModule } from './user/user.module';
-import { RoleModule } from './role/role.module';
-import { AddressModule } from './address/address.module';
-import { FavoriteModule } from './favorite/favorite.module';
-import { FollowerModule } from './follower/follower.module';
 import { BlockModule } from './block/block.module';
 import { DeviceModule } from './device/device.module';
+import { FavoriteModule } from './favorite/favorite.module';
+import { FollowerModule } from './follower/follower.module';
+import { AuthGuard } from './guards/auth.guard';
+import { RoleModule } from './role/role.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { DeviceModule } from './device/device.module';
         port: parseInt(configService.get<string>('DB_PORT')),
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
+        database: 'userdb',
         synchronize:
           configService.get<string>('ENVIRONMENT') === 'development'
             ? true
