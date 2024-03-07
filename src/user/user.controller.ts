@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request as Req, Response as Res } from 'express';
 
+import { MessagePattern, Payload, Transport } from '@nestjs/microservices';
 import { Public } from 'src/decorators/public.decorator';
 import { LoginRequestDto } from './dtos/login.request.dto';
 import { RegisterRequestDto } from './dtos/register.request.dto';
@@ -87,5 +88,14 @@ export class UserController {
       });
       response.send(authanticated.user);
     }
+  }
+
+  @Public()
+  @MessagePattern('user.getById', Transport.NATS)
+  async getUserByNats(@Payload() data: any): Promise<any> {
+    if (data && data.id) {
+      return await this.userService.getById(data.id);
+    }
+    return undefined;
   }
 }

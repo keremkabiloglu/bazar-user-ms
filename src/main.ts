@@ -37,6 +37,7 @@ CrudConfigService.load({
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -46,6 +47,19 @@ async function bootstrap() {
   if (configService.get('ENVIRONMENT') === 'development') {
     app.setGlobalPrefix('user-service');
   }
+  app.connectMicroservice(
+    {
+      transport: Transport.NATS,
+      options: {
+        servers: configService.get('NATS_SERVER'),
+      },
+    },
+    {
+      inheritAppConfig: true,
+    },
+  );
+
+  app.startAllMicroservices();
   await app.listen(3000);
 }
 bootstrap();

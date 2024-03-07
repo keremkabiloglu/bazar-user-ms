@@ -123,13 +123,6 @@ export class UserService {
     }
   }
 
-  _upperCaseFirstLetters(str: string) {
-    return str
-      .split(' ')
-      .map((n) => n[0].toUpperCase() + n.slice(1))
-      .join(' ');
-  }
-
   async refresh(refreshToken: string): Promise<AuthenticatedUser> {
     try {
       const verified = await this.jwtService.verifyAsync(refreshToken);
@@ -172,6 +165,12 @@ export class UserService {
     }
   }
 
+  async getById(id: number): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { id: id },
+    });
+  }
+
   private async generateJwt(
     payload: JWTPayload,
     expireSeconds: number,
@@ -192,5 +191,12 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  _upperCaseFirstLetters(str: string) {
+    return str
+      .split(' ')
+      .map((n) => n[0].toUpperCase() + n.slice(1))
+      .join(' ');
   }
 }

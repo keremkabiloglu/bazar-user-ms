@@ -2,20 +2,11 @@ import { Address } from 'src/address/entities/address.entity';
 import { Favorite } from 'src/favorite/entities/favorite.entity';
 import { Role } from 'src/role/entities/role.entity';
 import { DefaultEntity } from 'src/util/default.e';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Gender } from '../enums/gender.enum';
 
 @Entity()
 export class User extends DefaultEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @Column({
     unique: true,
     default: '',
