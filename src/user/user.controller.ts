@@ -11,6 +11,7 @@ import { Request as Req, Response as Res } from 'express';
 
 import { MessagePattern, Payload, Transport } from '@nestjs/microservices';
 import { Public } from 'src/decorators/public.decorator';
+import { NatsGetByIdDto } from 'src/nats.client/dto/nats.get.by.id.dto';
 import { LoginRequestDto } from './dtos/login.request.dto';
 import { RegisterRequestDto } from './dtos/register.request.dto';
 import { UserService } from './user.service';
@@ -90,12 +91,8 @@ export class UserController {
     }
   }
 
-  @Public()
   @MessagePattern('user.getById', Transport.NATS)
-  async getUserByNats(@Payload() data: any): Promise<any> {
-    if (data && data.id) {
-      return await this.userService.getById(data.id);
-    }
-    return undefined;
+  async getUserByNats(@Payload() data: NatsGetByIdDto): Promise<any> {
+    return await this.userService.getById(data.id);
   }
 }
