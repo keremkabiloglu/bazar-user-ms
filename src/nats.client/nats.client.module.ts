@@ -12,6 +12,9 @@ import { NatsClientService } from './nats.client.service';
           transport: Transport.NATS,
           options: {
             servers: configService.get('NATS_SERVER'),
+            headers: {
+              'nats-credential': configService.get('NATS_CREDENTIAL'),
+            },
           },
         }),
         inject: [ConfigService],

@@ -47,17 +47,12 @@ async function bootstrap() {
   if (configService.get('ENVIRONMENT') === 'development') {
     app.setGlobalPrefix('user-service');
   }
-  app.connectMicroservice(
-    {
-      transport: Transport.NATS,
-      options: {
-        servers: configService.get('NATS_SERVER'),
-      },
+  app.connectMicroservice({
+    transport: Transport.NATS,
+    options: {
+      servers: configService.get('NATS_SERVER'),
     },
-    {
-      inheritAppConfig: true,
-    },
-  );
+  });
 
   app.startAllMicroservices();
   await app.listen(3000);

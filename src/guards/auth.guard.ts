@@ -29,9 +29,18 @@ export class AuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
+
     const request = context.switchToHttp().getRequest();
+
     const token = this.extractTokenFromHeader(request);
     if (!token) {
+      const natsCredentials = context
+        .switchToRpc()
+        .getContext()
+        .args[1].headers.get('nats-credential')[0];
+      if (natsCredentials === this.configService.get('NATS_CREDENTIAL')) {
+        return true;
+      }
       throw new UnauthorizedException();
     }
 
