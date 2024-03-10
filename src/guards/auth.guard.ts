@@ -34,10 +34,7 @@ export class AuthGuard implements CanActivate {
 
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      const natsCredentials = context
-        .switchToRpc()
-        .getContext()
-        .args[1].headers.get('nats-credential')[0];
+      const natsCredentials = this.getNatsCredentials(context);
       if (natsCredentials === this.configService.get('NATS_CREDENTIAL')) {
         return true;
       }
@@ -82,5 +79,13 @@ export class AuthGuard implements CanActivate {
     }
 
     return undefined;
+  }
+
+  private getNatsCredentials(context: ExecutionContext): string {
+    const args = context.switchToRpc().getContext().args;
+    if (args && Array.isArray(args) && args.length > 1) {
+      return args[1].headers.get('nats-credential');
+    }
+    return null;
   }
 }
