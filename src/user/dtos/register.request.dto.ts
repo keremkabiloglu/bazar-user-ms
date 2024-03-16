@@ -1,17 +1,12 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-  Matches,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsPhoneNumber, Matches } from 'class-validator';
 
 export class RegisterRequestDto {
+  @IsNotEmpty()
   @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,32}(?: [a-zA-ZçğıöşüÇĞİÖŞÜ]+)?$/)
   name: string;
 
+  @IsNotEmpty()
   @Matches(/^[a-zA-ZçğıöşüÇĞİÖŞÜ]{2,32}$/)
-  @IsString()
   surname: string;
 
   @IsNotEmpty()

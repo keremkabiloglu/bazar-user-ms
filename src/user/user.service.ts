@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { GeneratedJWT } from '../util/model/generated.jwt';
 import { JWTPayload } from '../util/model/jwt.payload';
 import { RegisterRequestDto } from './dtos/register.request.dto';
+import { UpdateInformationRequestDto } from './dtos/update.information.request.dto';
 import { User } from './entities/user.entity';
 import { AuthenticatedUser } from './models/authanticated.user';
 
@@ -63,6 +64,54 @@ export class UserService {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  async refresh(refreshToken: string): Promise<AuthenticatedUser> {
+    try {
+      const verified = await this.jwtService.verifyAsync(refreshToken);
+      if (verified) {
+        const jwtExpireMilliSeconds =
+          this.configService.get<number>('JWT_EXPIRE');
+        const refreshExpireMilliSeconds =
+          this.configService.get<number>('JWT_REFRESH_EXPIRE');
+        const payload = {
+          id: verified.id,
+          email: verified.email,
+          role: verified.role.name,
+          permissions: verified.role.permissions.map((p) => {
+            return { [p.entity]: p.permissions };
+          }),
+        };
+        const jwt = await this.generateJwt(payload, jwtExpireMilliSeconds);
+        const refresh = await this.generateJwt(
+          payload,
+          refreshExpireMilliSeconds,
+        );
+        const user = await this.userRepository.findOne({
+          where: { id: verified.id },
+        });
+        if (user) {
+          return new AuthenticatedUser({
+            user: user,
+            jwt: jwt,
+            refresh: refresh,
+          });
+        } else {
+          throw new HttpException(
+            'USER_NOT_FOUND',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+    } catch (error) {
+      throw new HttpException('REFRESH_TOKEN_INVALID', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async getById(id: number): Promise<User> {
+    return await this.userRepository.findOne({
+      where: { id: id },
+    });
   }
 
   async register(
@@ -123,52 +172,74 @@ export class UserService {
     }
   }
 
-  async refresh(refreshToken: string): Promise<AuthenticatedUser> {
-    try {
-      const verified = await this.jwtService.verifyAsync(refreshToken);
-      if (verified) {
-        const jwtExpireMilliSeconds =
-          this.configService.get<number>('JWT_EXPIRE');
-        const refreshExpireMilliSeconds =
-          this.configService.get<number>('JWT_REFRESH_EXPIRE');
-        const payload = {
-          id: verified.id,
-          email: verified.email,
-          role: verified.role.name,
-          permissions: verified.role.permissions.map((p) => {
-            return { [p.entity]: p.permissions };
-          }),
-        };
-        const jwt = await this.generateJwt(payload, jwtExpireMilliSeconds);
-        const refresh = await this.generateJwt(
-          payload,
-          refreshExpireMilliSeconds,
+  async updateInformation(
+    userId: number,
+    updateInformationRequestDto: UpdateInformationRequestDto,
+  ): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (user) {
+      if (updateInformationRequestDto.name && user.firstName.length == 0) {
+        user.firstName = this._upperCaseFirstLetters(
+          updateInformationRequestDto.name,
         );
-        const user = await this.userRepository.findOne({
-          where: { id: verified.id },
+      }
+      if (updateInformationRequestDto.surname && user.lastName.length == 0) {
+        user.lastName = this._upperCaseFirstLetters(
+          updateInformationRequestDto.surname,
+        );
+      }
+      if (updateInformationRequestDto.username) {
+        const usernameExist = await this.userRepository.findOne({
+          where: { username: updateInformationRequestDto.username },
         });
-        if (user) {
-          return new AuthenticatedUser({
-            user: user,
-            jwt: jwt,
-            refresh: refresh,
-          });
-        } else {
+        if (usernameExist && usernameExist.id != user.id) {
+          throw new HttpException('USERNAME_ALREADY_USED', HttpStatus.CONFLICT);
+        }
+        user.username = updateInformationRequestDto.username;
+      }
+      if (updateInformationRequestDto.email) {
+        const emailExist = await this.userRepository.findOne({
+          where: { email: updateInformationRequestDto.email },
+        });
+        if (emailExist && emailExist.id != user.id) {
+          throw new HttpException('EMAIL_ALREADY_USED', HttpStatus.CONFLICT);
+        }
+        user.email = updateInformationRequestDto.email;
+      }
+      if (updateInformationRequestDto.phone) {
+        const phoneExist = await this.userRepository.findOne({
+          where: { phoneNumber: updateInformationRequestDto.phone },
+        });
+        if (phoneExist && phoneExist.id != user.id) {
+          throw new HttpException('PHONE_ALREADY_USED', HttpStatus.CONFLICT);
+        }
+        user.phoneNumber = updateInformationRequestDto.phone;
+      }
+      if (updateInformationRequestDto.password) {
+        user.password = updateInformationRequestDto.password;
+      }
+      if (updateInformationRequestDto.gender) {
+        user.gender = updateInformationRequestDto.gender;
+      }
+      if (updateInformationRequestDto.birthDate) {
+        const isOverEighteen =
+          new Date(updateInformationRequestDto.birthDate).getTime() <
+          new Date().getTime() - 567993600000;
+        if (!isOverEighteen) {
           throw new HttpException(
-            'USER_NOT_FOUND',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+            'BIRTH_DATE_MUST_BE_OVER_EIGHTEEN',
+            HttpStatus.BAD_REQUEST,
           );
         }
+        user.birthDate = updateInformationRequestDto.birthDate;
       }
-    } catch (error) {
-      throw new HttpException('REFRESH_TOKEN_INVALID', HttpStatus.FORBIDDEN);
+      const updatedUser = await this.userRepository.save(user);
+      return { id: updatedUser.id };
+    } else {
+      throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
-  }
-
-  async getById(id: number): Promise<User> {
-    return await this.userRepository.findOne({
-      where: { id: id },
-    });
   }
 
   private async generateJwt(
